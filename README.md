@@ -79,6 +79,8 @@ Instructions to connect a Viessmann Optolink heating to Home-Assistant using a P
   | GREEN | -> | TXD0 |
   | YELLOW | -> | RXD0 |
   
+  To make the soldering easier you can 3D print the single [Optolink Adapter](files/Optolink-Adapter.stl) I used to test if everyting fits. Here you can solder all parts together and later just put in the real case as there isn't enough space to solder it right there.
+
   You can also use jumper wires here. Even with the soldered PoE module they will exactly fit in the 3D printed case later.
 
 - Put everything in the 3D printed case. If the photo transistor or the IR led don't hold in place just use some hot glue from behind to fix them. Test everything before you close the lid and mount the screws.
