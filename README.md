@@ -76,9 +76,11 @@ Instructions to connect a Viessmann Optolink heating to Home-Assistant using a P
   |-|-|-|
   | RED | -> | 3V3 |
   | BLACK | -> | GND |
-  | GREEN | -> | TXD0 |
-  | YELLOW | -> | RXD0 |
+  | GREEN | -> | TXD (NOT TXD0!) |
+  | YELLOW | -> | RXD (NOT RXD0!) |
   
+  It is important to use the second hardware UART (IO05 RXD, IO02 TXD) for the circuit as there seems to be a problem in ESPHome using the default serial port with the strange connection parameters with two stop bits.
+
   To make the soldering easier you can 3D print the single [Optolink Adapter](files/Optolink-Adapter.stl) I used to test if everyting fits. Here you can solder all parts together and later just put in the real case as there isn't enough space to solder it right there.
 
   You can also use jumper wires here. Even with the soldered PoE module they will exactly fit in the 3D printed case later.
@@ -89,99 +91,197 @@ Instructions to connect a Viessmann Optolink heating to Home-Assistant using a P
 - In ESPHome you can start with the following template:
   ```yaml
     esphome:
-    name: heating-optolink
-    friendly_name: heating-optolink
-    build_path: esp32
-    platformio_options:
+      name: heating-optolink
+      friendly_name: heating-optolink
+      build_path: esp32
+      platformio_options:
         upload_speed: 115200
 
     esp32:
-    board: esp32-c3-devkitm-1
-    variant: esp32c3
-    framework:
+      board: esp32-c3-devkitm-1
+      variant: esp32c3
+      framework:
         type: esp-idf
         version: latest
         platform_version: 6.5.0
 
     external_components:
-    - source:
-        type: git
-        url: https://github.com/JuergenLeber/esphome
-        ref: dm9051
-        components:
-        - ethernet
-        refresh: 0s
-    - source: 
-        type: git
-        url: https://github.com/JuergenLeber/esphome_vitoconnect
-        ref: master
-        refresh: 0s
+      - source:
+          type: git
+          url: https://github.com/JuergenLeber/esphome
+          ref: dm9051
+          components:
+            - ethernet
+          refresh: 0s
+      - source: 
+          type: git
+          url: https://github.com/JuergenLeber/esphome_vitoconnect
+          ref: master
+          refresh: 0s
         
     ethernet:
-    type: DM9051
-    clk_pin: GPIO07
-    mosi_pin: GPIO10
-    miso_pin: GPIO03
-    cs_pin: GPIO09
-    interrupt_pin: GPIO08
-    reset_pin: GPIO06
-    clock_speed: 8MHz  
+      type: DM9051
+      clk_pin: GPIO07
+      mosi_pin: GPIO10
+      miso_pin: GPIO03
+      cs_pin: GPIO09
+      interrupt_pin: GPIO08
+      reset_pin: GPIO06
+      clock_speed: 8MHz  
 
     logger:
       hardware_uart: UART0
-      baud_rate: 0
       level: DEBUG
-    
+
     uart:
-    - id: uart_vitoconnect
-        rx_pin: GPIO20
-        tx_pin: GPIO21
+      - id: uart_vitoconnect
+        rx_pin: GPIO05
+        tx_pin: GPIO02
         baud_rate: 4800
         data_bits: 8
         parity: EVEN
         stop_bits: 2
-    
+
     vitoconnect:
-    uart_id: uart_vitoconnect
-    protocol: KW
-    update_interval: 30s
+      uart_id: uart_vitoconnect
+      protocol: KW
+      update_interval: 30s
 
     sensor:
-    - platform: vitoconnect
+      - platform: vitoconnect
         name: "Außentemperatur"
         address: 0x0800
         length: 2
         unit_of_measurement: "°C"
         accuracy_decimals: 1
         filters:
-        - multiply: 0.1
+          - multiply: 0.1
         device_class: temperature
-    - platform: vitoconnect
+      - platform: vitoconnect
         name: "Kesseltemperatur"
         address: 0x0802
         length: 2
         unit_of_measurement: "°C"
         accuracy_decimals: 1
         filters:
-        - multiply: 0.1
+          - multiply: 0.1
+        device_class: temperature
+      - platform: vitoconnect
+        name: "Speichertemperatur"
+        address: 0x0804
+        length: 2
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        filters:
+          - multiply: 0.1
+        device_class: temperature
+      - platform: vitoconnect
+        name: "Rücklauftemperatur"
+        address: 0x080A
+        length: 2
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        filters:
+          - multiply: 0.1
+        device_class: temperature
+      - platform: vitoconnect
+        name: "Vorlauftemperatur"
+        address: 0x080C
+        length: 2
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        filters:
+          - multiply: 0.1
+        device_class: temperature
+      - platform: vitoconnect
+        name: "Vorlaufsolltemperatur"
+        address: 0x2544
+        length: 2
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        filters:
+          - multiply: 0.1
+        device_class: temperature
+      - platform: vitoconnect
+        name: "Kesselsolltemperatur"
+        address: 0x555A
+        length: 2
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
+        filters:
+          - multiply: 0.1
+        device_class: temperature
+      - platform: vitoconnect
+        name: "Brennerstarts"
+        address: 0x088A
+        length: 4
+        unit_of_measurement: ""
+      - platform: vitoconnect
+        name: "Brennerbetriebsstunden Stufe 1"
+        address: 0x08A7
+        length: 4
+        unit_of_measurement: "s"
+        device_class: duration
+      - platform: vitoconnect
+        name: "Brennerbetriebsstunden Stufe 2"
+        address: 0x08AB
+        length: 4
+        unit_of_measurement: "s"
+        device_class: duration
+      - platform: vitoconnect
+        name: "Ölverbrauch"
+        address: 0x7574
+        length: 4
+        unit_of_measurement: "l"
+        accuracy_decimals: 3
+        filters:
+          - multiply: 0.001
+        device_class: volume
+      - platform: vitoconnect
+        name: "Betriebsart"
+        address: 0x2301
+        length: 1
+      - platform: vitoconnect
+        name: "Heizkennlinie Niveau"
+        address: 0x2304
+        length: 1
+      - platform: vitoconnect
+        name: "Heizkennlinie Neigung"
+        address: 0x2305
+        length: 1
+        accuracy_decimals: 1
+        filters:
+          - multiply: 0.1
+      - platform: vitoconnect
+        name: "Raumtemperatur Soll"
+        address: 0x2306
+        length: 1
+        unit_of_measurement: "°C"
+        accuracy_decimals: 1
         device_class: temperature
 
     binary_sensor:
-    - platform: vitoconnect
+      - platform: vitoconnect
         name: "Störung"
         address: 0x0883
-
+      - platform: vitoconnect
+        name: "Heizkreispumpe"
+        address: 0x250A
+      - platform: vitoconnect
+        name: "Warmwasserfreigabe"
+        address: 0x2508
+    
     api:
-    encryption:
+      encryption:
         key: <YOUR KEY>
 
     ota:
-    - platform: esphome
+      - platform: esphome
         password: <YOUR PASSWORD>
   ```
   As the current ESPHome (2024.10.2 as of writing) doesn't support the ethernet chip on the ETH01-EVO yet this component has to be sourced from an external repository.
 
-  Same for the [Vitoconnect component](https://github.com/dannerph/esphome_vitoconnect) which hasn't made it to the official repositories yet. It is currently linked to my fork as I repaired the KW protocol of the component and the PR is still in progress. 
+  Same for the [Vitoconnect component](https://github.com/dannerph/esphome_vitoconnect) which hasn't made it to the official repositories yet. It is currently linked to my fork as I repaired the KW protocol of the component. 
 
 - For additional devices, values and other protocols (I only tested the KW protocol here) please see the documentation from the [openv](https://github.com/openv) project:
    - [Devices supported](https://github.com/openv/openv/wiki/Geräte)
