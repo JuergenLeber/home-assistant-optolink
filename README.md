@@ -89,196 +89,194 @@ Instructions to connect a Viessmann Optolink heating to Home-Assistant using a P
 
 ## Software installation
 - In ESPHome you can start with the following template:
-  ```yaml
-    esphome:
-      name: heating-optolink
-      friendly_name: heating-optolink
-      build_path: esp32
-      platformio_options:
-        upload_speed: 115200
+```yaml
+esphome:
+  name: heating-optolink
+  friendly_name: heating-optolink
+  build_path: esp32
+  platformio_options:
+    upload_speed: 115200
 
-    esp32:
-      board: esp32-c3-devkitm-1
-      variant: esp32c3
-      framework:
-        type: esp-idf
-        version: latest
-        platform_version: 6.5.0
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  framework:
+    type: esp-idf
 
-    external_components:
-      - source:
-          type: git
-          url: https://github.com/JuergenLeber/esphome
-          ref: dm9051
-          components:
-            - ethernet
-          refresh: 0s
-      - source: 
-          type: git
-          url: https://github.com/JuergenLeber/esphome_vitoconnect
-          ref: master
-          refresh: 0s
-        
-    ethernet:
-      type: DM9051
-      clk_pin: GPIO07
-      mosi_pin: GPIO10
-      miso_pin: GPIO03
-      cs_pin: GPIO09
-      interrupt_pin: GPIO08
-      reset_pin: GPIO06
-      clock_speed: 8MHz  
+external_components:
+  - source:
+      type: git
+      url: https://github.com/JuergenLeber/esphome
+      ref: dm9051
+    components:
+      - ethernet
+    refresh: 0s
+  - source: 
+      type: git
+      url: https://github.com/JuergenLeber/esphome_vitoconnect
+      ref: master
+    refresh: 0s
+      
+ethernet:
+  type: DM9051
+  clk_pin: GPIO07
+  mosi_pin: GPIO10
+  miso_pin: GPIO03
+  cs_pin: GPIO09
+  interrupt_pin: GPIO08
+  reset_pin: GPIO06
+  clock_speed: 8MHz  
 
-    logger:
-      hardware_uart: UART0
-      level: DEBUG
+logger:
+  hardware_uart: UART0
+  level: DEBUG
 
-    uart:
-      - id: uart_vitoconnect
-        rx_pin: GPIO05
-        tx_pin: GPIO02
-        baud_rate: 4800
-        data_bits: 8
-        parity: EVEN
-        stop_bits: 2
+uart:
+  - id: uart_vitoconnect
+    rx_pin: GPIO05
+    tx_pin: GPIO02
+    baud_rate: 4800
+    data_bits: 8
+    parity: EVEN
+    stop_bits: 2
 
-    vitoconnect:
-      uart_id: uart_vitoconnect
-      protocol: KW
-      update_interval: 30s
+vitoconnect:
+  uart_id: uart_vitoconnect
+  protocol: KW
+  update_interval: 30s
 
-    sensor:
-      - platform: vitoconnect
-        name: "Außentemperatur"
-        address: 0x0800
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Kesseltemperatur"
-        address: 0x0802
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Speichertemperatur"
-        address: 0x0804
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Rücklauftemperatur"
-        address: 0x080A
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Vorlauftemperatur"
-        address: 0x080C
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Vorlaufsolltemperatur"
-        address: 0x2544
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Kesselsolltemperatur"
-        address: 0x555A
-        length: 2
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-        device_class: temperature
-      - platform: vitoconnect
-        name: "Brennerstarts"
-        address: 0x088A
-        length: 4
-        unit_of_measurement: ""
-      - platform: vitoconnect
-        name: "Brennerbetriebsstunden Stufe 1"
-        address: 0x08A7
-        length: 4
-        unit_of_measurement: "s"
-        device_class: duration
-      - platform: vitoconnect
-        name: "Brennerbetriebsstunden Stufe 2"
-        address: 0x08AB
-        length: 4
-        unit_of_measurement: "s"
-        device_class: duration
-      - platform: vitoconnect
-        name: "Ölverbrauch"
-        address: 0x7574
-        length: 4
-        unit_of_measurement: "l"
-        accuracy_decimals: 3
-        filters:
-          - multiply: 0.001
-        device_class: volume
-      - platform: vitoconnect
-        name: "Betriebsart"
-        address: 0x2301
-        length: 1
-      - platform: vitoconnect
-        name: "Heizkennlinie Niveau"
-        address: 0x2304
-        length: 1
-      - platform: vitoconnect
-        name: "Heizkennlinie Neigung"
-        address: 0x2305
-        length: 1
-        accuracy_decimals: 1
-        filters:
-          - multiply: 0.1
-      - platform: vitoconnect
-        name: "Raumtemperatur Soll"
-        address: 0x2306
-        length: 1
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-        device_class: temperature
+sensor:
+  - platform: vitoconnect
+    name: "Außentemperatur"
+    address: 0x0800
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Kesseltemperatur"
+    address: 0x0802
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Speichertemperatur"
+    address: 0x0804
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Rücklauftemperatur"
+    address: 0x080A
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Vorlauftemperatur"
+    address: 0x080C
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Vorlaufsolltemperatur"
+    address: 0x2544
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Kesselsolltemperatur"
+    address: 0x555A
+    length: 2
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: temperature
+  - platform: vitoconnect
+    name: "Brennerstarts"
+    address: 0x088A
+    length: 4
+    unit_of_measurement: ""
+  - platform: vitoconnect
+    name: "Brennerbetriebsstunden Stufe 1"
+    address: 0x08A7
+    length: 4
+    unit_of_measurement: "s"
+    device_class: duration
+  - platform: vitoconnect
+    name: "Brennerbetriebsstunden Stufe 2"
+    address: 0x08AB
+    length: 4
+    unit_of_measurement: "s"
+    device_class: duration
+  - platform: vitoconnect
+    name: "Ölverbrauch"
+    address: 0x7574
+    length: 4
+    unit_of_measurement: "l"
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+    device_class: volume
+  - platform: vitoconnect
+    name: "Betriebsart"
+    address: 0x2301
+    length: 1
+  - platform: vitoconnect
+    name: "Heizkennlinie Niveau"
+    address: 0x2304
+    length: 1
+  - platform: vitoconnect
+    name: "Heizkennlinie Neigung"
+    address: 0x2305
+    length: 1
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+  - platform: vitoconnect
+    name: "Raumtemperatur Soll"
+    address: 0x2306
+    length: 1
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    device_class: temperature
 
-    binary_sensor:
-      - platform: vitoconnect
-        name: "Störung"
-        address: 0x0883
-      - platform: vitoconnect
-        name: "Heizkreispumpe"
-        address: 0x250A
-      - platform: vitoconnect
-        name: "Warmwasserfreigabe"
-        address: 0x2508
-    
-    api:
-      encryption:
-        key: <YOUR KEY>
+binary_sensor:
+  - platform: vitoconnect
+    name: "Störung"
+    address: 0x0883
+  - platform: vitoconnect
+    name: "Heizkreispumpe"
+    address: 0x250A
+  - platform: vitoconnect
+    name: "Warmwasserfreigabe"
+    address: 0x2508
 
-    ota:
-      - platform: esphome
-        password: <YOUR PASSWORD>
-  ```
+api:
+  encryption:
+    key: "<KEY>"
+
+ota:
+  - platform: esphome
+    password: "<PASSWORD>"
+```
   As the current ESPHome (2024.10.2 as of writing) doesn't support the ethernet chip on the ETH01-EVO yet this component has to be sourced from an external repository.
 
   Same for the [Vitoconnect component](https://github.com/dannerph/esphome_vitoconnect) which hasn't made it to the official repositories yet. It is currently linked to my fork as I repaired the KW protocol of the component. 
