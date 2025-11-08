@@ -37,13 +37,15 @@ Instructions to connect a Viessmann Optolink heating to Home-Assistant using a P
 
   You can find the STL files for the case [here](files/ETH01-EVO-Optolink-Case.stl) and for the lid [here](files/ETH01-EVO-Optolink-Case-lid.stl). It prints very well with normal PLA but needs supports because of the "V" connector.
 
+  If you want to modify the case you can download my Autodesk Fusion .f3d file [here](files/ETH01-EVO-Optolink-Case.f3d). I just imported the case from [ledhed_jgh](https://www.thingiverse.com/ledhed_jgh), resized it and added the "V" adapter with the holes for the LEDs. The lid is the untouched version.
+
 - Two countersunk screws M2x7 to hold the lid on the case
 
 ## Prerequisites
 - A 3D printer to print the case
 - Basic soldering skills
 - Some electronic knowledge (plus, minus, anode, cathode, etc.)
-- A Home-Assistant installation with the newest ESPHome (2024.10.2 as of writing)
+- A Home-Assistant installation with the newest ESPHome (2025.10.4 as of writing)
 
 ## Hardware installation
 - ***IMPORTANT***: Don't solder the pin headers that came with the ETH01-EVO yet as they have to be soldered differently than in the images from the sellers and the device has to be programmed first!
@@ -104,16 +106,9 @@ esp32:
     type: esp-idf
 
 external_components:
-  - source:
-      type: git
-      url: https://github.com/JuergenLeber/esphome
-      ref: dm9051
-    components:
-      - ethernet
-    refresh: 0s
   - source: 
       type: git
-      url: https://github.com/JuergenLeber/esphome_vitoconnect
+      url: https://github.com/dannerph/esphome_vitoconnect
       ref: master
     refresh: 0s
       
@@ -277,9 +272,9 @@ ota:
   - platform: esphome
     password: "<PASSWORD>"
 ```
-  As the current ESPHome (2024.10.2 as of writing) doesn't support the ethernet chip on the ETH01-EVO yet this component has to be sourced from an external repository.
+  As the current ESPHome (2025.10.4 as of writing) supports the ethernet chip on the ETH01-EVO finally it's not necessary anymore to source this component from an external repository. This is only important for you if you aren't starting from scratch but updating from an older version. See the example above for the correct yaml.
 
-  Same for the [Vitoconnect component](https://github.com/dannerph/esphome_vitoconnect) which hasn't made it to the official repositories yet. It is currently linked to my fork as I repaired the KW protocol of the component. 
+  The [Vitoconnect component](https://github.com/dannerph/esphome_vitoconnect) hasn't made it to the official repositories yet. So you need to source it from the external repository. It's not linked to my fork anymore as the owner included my PR (I fixed the KW protocol) and additionally did some fixes. But you can still link to my fork as it's  up-to-date.
 
 - For additional devices, values and other protocols (I only tested the KW protocol here) please see the documentation from the [openv](https://github.com/openv) project:
    - [Devices supported](https://github.com/openv/openv/wiki/Geräte)
